@@ -39,7 +39,6 @@ def check_root():
 
 
 def run_choice():
-
     choice = tkinter.messagebox.askyesno(
         "Oracle Java Will Be Installed", "Do you wish to install Oracle Java on this system?")
 
@@ -81,7 +80,7 @@ def untar_jdk(jdk):
 
     oneDirup = '../'
 
-    # TrashDir = ("/home/$/.local/share/Trash/files")
+    # TrashDir = ("/home/$SUDO_USER/.local/share/Trash/files")
 
     # if (os.path.isdir(TrashDir)):
     #     if os.path.isfile(TrashDir) or os.path.islink(TrashDir):
