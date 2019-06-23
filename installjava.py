@@ -8,14 +8,12 @@ import tarfile
 import stat
 import subprocess
 import tkinter
-
 import tkinter.messagebox
 
 
 def check_linux():
     islinux = platform.system()
     if islinux == "Linux" or islinux == "Linux2" or islinux == "GNU" or islinux == "GNU/*":
-
         return islinux
     else:
         tkinter.messagebox.showwarning(
@@ -53,21 +51,19 @@ def get_jdk_version():
 
     if numOfFiles > 1:
         tkinter.messagebox.showerror(
-            "ERROR", f"you have {numOfFiles} files starting with 'jdk' in your folder with this script. Delete or move the excess files and leave only the downloaded jdk*.tar.gz in the folder")
+            "ERROR", f"you have {numOfFiles} files starting with 'jdk' in the same folder with this script. Delete or move the excess files and leave only the correct downloaded jdk*.tar.gz in the folder")
         exit()
     elif numOfFiles == 0:
         tkinter.messagebox.showerror(
-            "ERROR", "No downloaded jdk*.tar.gz files in the folder with this script. Please place your downloaded jdk*.tar.gz into the same folder with this script and run the script again.")
+            "ERROR", "No downloaded jdk*.tar.gz file in the folder with this script. Please place your downloaded jdk*.tar.gz into the same folder with this script and run the script again.")
         exit()
 
     jdkTarFile = jdkfilesB_List[0]
-    print("jdkTarFile =", jdkTarFile)
-
     return jdkTarFile
 
 
 def untar_jdk(jdk):
-    tkinter.messagebox.showinfo("INFO", f"Uncompressing your {jdk} folder")
+    print("Uncompressing the jdk tarfile")
 
     if jdk.endswith("tar.gz"):
         tar = tarfile.open(jdk, "r:gz")
@@ -168,12 +164,12 @@ def install_path(jdkVerDir):
     spc = "\n"
     JAVA = "JAVA_HOME=" + jdkVerDir + "\n"
     JRE = "JRE_HOME=$JAVA_HOME/jre\n"
-    PATH1 = "PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin\n"
+    #  PATH1 = "PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin\n"
     ex1 = "export JAVA_HOME\n"
     ex2 = "export JRE_HOME\n"
-    ex3 = "export PATH"
+    # ex3 = "export PATH"
 
-    fulljavaPath = spc + JAVA + JRE + PATH1 + ex1 + ex2 + ex3
+    fulljavaPath = spc + JAVA + JRE + ex1 + ex2
     print(fulljavaPath, "is what's entered into the path file")
 
     with open(pathDir2nd, 'a') as myfile:
@@ -188,7 +184,8 @@ def install_path(jdkVerDir):
 
 def make_executable():
     # check if file is executable. If not make it so.
-    filepathList = ['/usr/bin/java', '/usr/bin/javac', '/usr/bin/javap']
+    filepathList = ['/usr/bin/java', '/usr/bin/javac',
+                    '/usr/bin/javap', '/usr/bin/javadoc']
 
     for file in filepathList:
         st = os.stat(file)
@@ -201,35 +198,51 @@ def make_executable():
 
 
 def set_arch_java(jdkver, jdkVerDir):
-    if os.path.isfile("/usr/bin/archlinux-java"):
-        tkinter.messagebox.showinfo(
-            "INFO", "Archlinux helper script is available, so usint it to set the Java environment...")
-        subprocess.run(["archlinux-java", "set", jdkver])
-    else:
-        install_path(jdkVerDir)
 
-        src1 = os.path.join(jdkVerDir, '/jre/bin/java')
+    if os.path.isfile("./local_archlinux-java"):
+        print("Using local_archlinux-java helper script to set java environment")
+        subprocess.run(["./local_archlinux-java", "set", jdkver])
+    elif os.path.isfile("/usr/bin/archlinux-java"):
+        print("Found archlinux-java helper script so using it to set java environment")
+        subprocess.run(["./local_archlinux-java", "set", jdkver])
+    else:
+        src1 = os.path.join(jdkVerDir, 'bin/java')
         dest1 = '/usr/bin/java'
 
-        src2 = os.path.join(jdkVerDir, '/bin/javac')
+        src2 = os.path.join(jdkVerDir, 'bin/javac')
         dest2 = '/usr/bin/javac'
 
-        # src3 = os.path.join(jdkVerDir, '/usr/bin/javaws')
-        # dest3 = '/usr/bin/javaws'
-        # TODO: find out how to check if symlink already exists.
+        src3 = os.path.join(jdkVerDir, 'bin/javadoc')
+        dest3 = '/usr/bin/javadoc'
+
+        src4 = os.path.join(jdkVerDir, 'bin/javap')
+        dest4 = '/usr/bin/javap'
+
+        if os.path.islink('/usr/bin/java'):
+            os.unlink('/usr/bin/java')
+
+        if os.path.islink('/usr/bin/javac'):
+            os.unlink('/usr/bin/javac')
+
+        if os.path.islink('/usr/bin/javadoc'):
+            os.unlink('/usr/bin/javadoc')
+
+        if os.path.islink('/usr/bin/javap'):
+            os.unlink('/usr/bin/javap')
+
         os.symlink(src1, dest1)
         os.symlink(src2, dest2)
-        # b os.symlink(src3, dest3)
+        os.symlink(src3, dest3)
+        os.symlink(src4, dest4)
 
-        makeExecutable()
-
-        tkinter.messagebox.showinfo(
-            "INFO", f"No archlinux-java helper script found, so the Java executables in {src1} and {src2} have been symlinked to /usr/bin/")
+        install_path(jdkVerDir)
+        print("No archlinux-java script found, so manually symlinked everything")
+        make_executable()
 
 
 def bye(upkdJDKver):
     tkinter.messagebox.showinfo(
-        "Info", f"Java {upkdJDKver} now fully installed on this computer. You can test which java by entering 'java -version at the terminal prompt. bye...")
+        "Info", f"Java {upkdJDKver} now fully installed on this computer.\n You can test which java by entering 'java -version at the terminal prompt. bye...")
 
 
 def main():
@@ -240,9 +253,6 @@ def main():
     jdkTarName = get_jdk_version()
     untar_jdk(jdkTarName)
     upkdJDKver, jdkVerDir = move_jdk()
-    print(upkdJDKver, "and", jdkVerDir)
-    # installPATH(jdkVerDir)
-    # makeExecutable()
     set_arch_java(upkdJDKver, jdkVerDir)
     bye(upkdJDKver)
 
