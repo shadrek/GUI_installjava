@@ -235,9 +235,9 @@ def set_arch_java(jdkver, jdkVerDir):
         os.symlink(src3, dest3)
         os.symlink(src4, dest4)
 
-        install_path(jdkVerDir)
         print("No archlinux-java script found, so manually symlinked everything")
         make_executable()
+    install_path(jdkVerDir)
 
 
 def bye(upkdJDKver):
