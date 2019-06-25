@@ -204,7 +204,7 @@ def set_arch_java(jdkver, jdkVerDir):
         subprocess.run(["./local_archlinux-java", "set", jdkver])
     elif os.path.isfile("/usr/bin/archlinux-java"):
         print("Found archlinux-java helper script so using it to set java environment")
-        subprocess.run(["./local_archlinux-java", "set", jdkver])
+        subprocess.run(["archlinux-java", "set", jdkver])
     else:
         src1 = os.path.join(jdkVerDir, 'bin/java')
         dest1 = '/usr/bin/java'
