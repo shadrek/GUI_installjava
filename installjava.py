@@ -170,12 +170,9 @@ def install_path(jdkVerDir):
     # ex3 = "export PATH"
 
     fulljavaPath = spc + JAVA + JRE + ex1 + ex2
-    print(fulljavaPath, "is what's entered into the path file")
 
     with open(pathDir2nd, 'a') as myfile:
         myfile.write(fulljavaPath)
-
-    print("full path written")
 
     os.remove(pathDir)
     os.rename(pathDir2nd, pathDir)
